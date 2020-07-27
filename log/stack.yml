@@ -1,0 +1,14 @@
+version: "3"
+services:
+  tad:
+    image: postgres:9.6
+    container_name: "postgres"
+    environment:
+      - POSTGRES_DB=devdojo
+      - POSTGRES_USER=postgres
+      - TZ=GMT
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - "./data/postgres:/var/lib/postgresql/data"
+    ports:
+      - 5432:5432

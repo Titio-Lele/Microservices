@@ -1,0 +1,4 @@
+br\com\alexandredev\core\model\AbstractEntity.class
+br\com\alexandredev\core\repository\CourseRepository.class
+br\com\alexandredev\core\model\Course$CourseBuilder.class
+br\com\alexandredev\core\model\Course.class
