@@ -3,9 +3,10 @@ spring:
     name: registry
 server:
   port: 8081
-  eviction-interval-timer-in-ms: 1000
 
 eureka:
+  server:
+    eviction-interval-timer-in-ms: 1000
   instance:
     hostname: localhost
   client:
