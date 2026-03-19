@@ -5,11 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-<<<<<<< HEAD
-        <version>3.3.5</version>
-=======
         <version>3.4.13</version>
->>>>>>> e155e88 (chore(deps): remediate CVEs in Maven dependency stack)
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
