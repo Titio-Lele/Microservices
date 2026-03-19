@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: microservices
+data:
+  EUREKA_DEFAULT_ZONE: "http://discovery:8081/eureka"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/devdojo"
+
