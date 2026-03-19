@@ -2,12 +2,6 @@
 **/target/
 **/build/
 
-# Maven wrapper (keep tracked)
-!mvnw
-!mvnw.cmd
-!.mvn/wrapper/maven-wrapper.jar
-!.mvn/wrapper/maven-wrapper.properties
-
 # Java artifacts
 *.class
 *.jar
@@ -15,6 +9,12 @@
 *.ear
 *.log
 hs_err_pid*
+
+# Maven wrapper (keep tracked)
+!mvnw
+!mvnw.cmd
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
 
 # IDEs
 .idea/
@@ -37,4 +37,3 @@ Thumbs.db
 # Local runtime/log data
 logs/
 log/data/
-
