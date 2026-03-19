@@ -1,164 +1,262 @@
 # Microservices (Processo Seletivo)
 
-Projeto de estudo de microservicos com Spring Boot/Spring Cloud, criado originalmente em 2020 e atualizado para uma stack moderna com Java 21.
+Projeto de estudo com Spring Boot e Spring Cloud, organizado como um multi-módulo Maven.
 
-## Resumo rapido
+## Checklist rápido
 
-Estado atual do projeto:
+- [x] Java `21`
+- [x] Spring Boot `3.3.5`
+- [x] Spring Cloud `2023.0.3`
+- [x] Módulos `core`, `log`, `discovery` e `gateway`
+- [x] PostgreSQL para o serviço `log`
+- [x] Eureka para service discovery
+- [x] Spring Cloud Gateway para roteamento externo
 
-- Java `21`
-- Spring Boot `3.3.5`
-- Spring Cloud `2023.0.3`
-- Maven reactor com os modulos: `core`, `log`, `discovery` e `gateway`
-- Persistencia do servico `log` em PostgreSQL
-- Service discovery com Eureka
-- API Gateway com **Spring Cloud Gateway**
+## Visão geral
 
-## Arquitetura
-
-### Modulos
+### Módulos
 
 - `core`: biblioteca compartilhada com a entidade `Course` e o `CourseRepository`
-- `log`: microservico REST que expoe os cursos e acessa o banco PostgreSQL
-- `discovery`: servidor Eureka para registro e descoberta de servicos
-- `gateway`: gateway HTTP que recebe as chamadas externas e as encaminha para os servicos internos
+- `discovery`: servidor Eureka
+- `log`: microserviço REST com persistência em PostgreSQL
+- `gateway`: API Gateway que encaminha chamadas para o serviço `log`
 
 ### Fluxo principal
 
 1. O cliente chama o `gateway`
-2. O `gateway` resolve o servico `log` via Eureka
-3. O `gateway` encaminha a requisicao para o `log`
-4. O `log` usa o modulo `core` e consulta o PostgreSQL
+2. O `gateway` resolve o serviço `log` via Eureka
+3. O `gateway` encaminha a requisição para o `log`
+4. O `log` usa o módulo `core` e consulta o PostgreSQL
 
-## O que mudou na migracao
-
-Comparado ao estado antigo do projeto:
-
-- o projeto agora compila e empacota com **Java 21**
-- a base foi migrada para **Spring Boot 3**
-- o codigo JPA/validation foi atualizado de `javax.*` para `jakarta.*`
-- o `gateway` deixou de usar Zuul e passou a usar **Spring Cloud Gateway**
-- o build raiz passou a incluir todos os modulos no reactor
-
-## Enderecos e portas
+## Portas e endpoints
 
 - Eureka dashboard: `http://localhost:8081/`
-- servico `log`: `http://localhost:8082/`
-- gateway: `http://localhost:8080/`
+- Serviço `log`: `http://localhost:8082/`
+- Gateway: `http://localhost:8080/`
 
-## Roteamento do gateway
-
-O `gateway` possui a seguinte rota principal:
+### Rota configurada no gateway
 
 - entrada externa: `/gateway/log/**`
-- destino interno: servico `log`
-- comportamento: remove os dois primeiros segmentos do path (`StripPrefix=2`)
+- destino interno: `lb://log`
+- filtro aplicado: `StripPrefix=2`
 
 Exemplo:
 
-- requisicao externa: `/gateway/log/v1/admin/course`
-- requisicao encaminhada ao `log`: `/v1/admin/course`
+- entrada: `/gateway/log/v1/admin/course`
+- destino real no `log`: `/v1/admin/course`
 
-## Como subir localmente
-
-### 1) Pre-requisitos
+## Pré-requisitos
 
 - Java 21
-- Maven 3.8+
-- Docker e Docker Compose
+- Maven 3.8+ ou uso do wrapper `./mvnw`
+- Docker com `docker compose`
 
-### 2) Subir o PostgreSQL
+## Banco de dados
 
-O banco usado pelo servico `log` esta descrito em `log/stack.yml`.
-
-```bash
-cd "/home/dreadlord/Documentos/Projetos/Java/Microservices/log"
-docker compose -f stack.yml up -d
-```
-
-### 3) Gerar o build completo
+O PostgreSQL usado pelo serviço `log` está em `log/stack.yml`.
 
 Da raiz do projeto:
 
-```bash
-cd "/home/dreadlord/Documentos/Projetos/Java/Microservices"
+```zsh
+docker compose -f log/stack.yml up -d
+```
+
+O serviço `log` usa, por padrão:
+
+- banco: `devdojo`
+- usuário: `postgres`
+- senha: `postgres`
+- porta: `5432`
+
+As migrations do serviço `log` ficam em `log/src/main/resources/db/migration` e são aplicadas automaticamente na subida da aplicação.
+
+> Observação: versões recentes do Docker Compose exibem um aviso informando que o campo `version` do arquivo YAML é obsoleto. É apenas um aviso e não impede a subida do container.
+
+## Build do projeto
+
+Na raiz do repositório:
+
+```zsh
+./mvnw clean package
+```
+
+Se preferir usar o Maven instalado no sistema:
+
+```zsh
 mvn clean package
 ```
 
-### 4) Subir os servicos em terminais separados
+## Ordem recomendada para subir localmente
+
+Suba os serviços nesta ordem:
+
+1. `discovery`
+2. `log`
+3. `gateway`
+
+## Como executar
+
+### Opção 1: executar a partir da raiz com `-pl`
 
 #### Discovery
 
-```bash
-cd "/home/dreadlord/Documentos/Projetos/Java/Microservices/discovery"
-mvn spring-boot:run
+```zsh
+./mvnw -pl discovery spring-boot:run
 ```
 
 #### Log
 
-```bash
-cd "/home/dreadlord/Documentos/Projetos/Java/Microservices/log"
-mvn spring-boot:run
+```zsh
+./mvnw -pl log -am spring-boot:run
 ```
 
 #### Gateway
 
-```bash
-cd "/home/dreadlord/Documentos/Projetos/Java/Microservices/gateway"
-mvn spring-boot:run
+```zsh
+./mvnw -pl gateway spring-boot:run
+```
+
+Sem usar `-pl`, a alternativa nativa do Maven é apontar diretamente para o `pom` do módulo:
+
+```zsh
+./mvnw -f gateway/pom.xml spring-boot:run
+```
+
+### Opção 2: executar dentro de cada módulo
+
+#### Discovery
+
+```zsh
+cd discovery
+../mvnw spring-boot:run
+```
+
+#### Log
+
+```zsh
+cd log
+../mvnw spring-boot:run
+```
+
+#### Gateway
+
+```zsh
+cd gateway
+../mvnw spring-boot:run
 ```
 
 ## Como testar
 
-### 1) Verificar o Eureka
+### Verificar registro no Eureka
 
-Abra no navegador:
+Abra:
 
 - `http://localhost:8081/`
 
-Quando `log` e `gateway` estiverem no ar, eles devem aparecer registrados no Eureka.
+Quando `log` e `gateway` estiverem no ar, ambos devem aparecer registrados.
 
-### 2) Testar o endpoint diretamente no `log`
+### Testar o endpoint diretamente no `log`
 
-```bash
+```zsh
 curl "http://localhost:8082/v1/admin/course"
 ```
 
-### 3) Testar o mesmo endpoint via `gateway`
+### Testar o endpoint via `gateway`
 
-```bash
+```zsh
 curl "http://localhost:8080/gateway/log/v1/admin/course"
 ```
 
 ## Testes Maven
 
-### Rodar tudo pela raiz
+### Rodar todos os testes
 
-```bash
-cd "/home/dreadlord/Documentos/Projetos/Java/Microservices"
-mvn test
+```zsh
+./mvnw test
 ```
 
-### Rodar build completo com empacotamento
+### Rodar build completo
 
-```bash
-cd "/home/dreadlord/Documentos/Projetos/Java/Microservices"
-mvn clean package
+```zsh
+./mvnw clean package
 ```
 
-### Rodar apenas um modulo
+### Rodar testes de um módulo específico
 
 Exemplo para `gateway`:
 
-```bash
-cd "/home/dreadlord/Documentos/Projetos/Java/Microservices"
-mvn -pl gateway test
+```zsh
+./mvnw -pl gateway test
 ```
 
-## Observacoes
+## Troubleshooting
 
-- o build raiz foi validado com sucesso em Java 21
-- os testes de `log`, `discovery` e `gateway` foram ajustados para subir o contexto com a stack atual
-- o `log` usa PostgreSQL em execucao normal e H2 apenas nos testes
-- ainda podem existir avisos de vulnerabilidade em analises estaticas do ecossistema Netflix/Eureka, mas o build Maven real do projeto esta funcional
+### 1. `gateway` falha com `Unable to find a suitable main class`
+
+Se o erro mencionar o projeto `processo-seletivo`, o comando foi executado no `pom.xml` raiz, que é apenas agregador (`packaging=pom`) e não possui classe `main`.
+
+Use um dos comandos abaixo:
+
+```zsh
+./mvnw -pl gateway spring-boot:run
+```
+
+ou:
+
+```zsh
+cd gateway
+../mvnw spring-boot:run
+```
+
+ou, a partir da raiz, apontando para o `pom.xml` do módulo:
+
+```zsh
+./mvnw -f gateway/pom.xml spring-boot:run
+```
+
+### 2. `log` falha com `Not a managed type: class br.com.alexandredev.core.model.Course`
+
+Esse problema estava relacionado ao escaneamento de entidades JPA no módulo `log`.
+
+Se você estiver com classes antigas em cache, execute:
+
+```zsh
+./mvnw clean compile -pl core,log -am
+```
+
+e então suba novamente o serviço:
+
+```zsh
+./mvnw -pl log -am spring-boot:run
+```
+
+### 3. Docker falha com erro de socket `docker.sock`
+
+Se aparecer algo como:
+
+- `failed to connect to the docker API`
+- `dial unix /run/user/1000/docker.sock: connect: no such file or directory`
+
+então o daemon Docker não está em execução.
+
+Em ambientes com Docker rootless, valide o serviço do usuário:
+
+```zsh
+systemctl --user status docker
+systemctl --user start docker
+```
+
+Depois tente novamente:
+
+```zsh
+docker compose -f log/stack.yml up -d
+```
+
+## Observações
+
+- o módulo `core` é biblioteca compartilhada e não deve ser executado isoladamente como aplicação Spring Boot
+- o `log` usa PostgreSQL em execução normal e H2 apenas nos testes
+- o `gateway` depende do Eureka para resolver `lb://log`
+- o `discovery` sobe na porta `8081` com o nome de aplicação `registry`
+- a forma mais simples de subir o `gateway` sem `-pl` é executar dentro de `gateway/` ou usar `-f gateway/pom.xml`
 
