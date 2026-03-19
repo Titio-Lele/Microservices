@@ -45,6 +45,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <executable>true</executable>
+                      <mainClass>br.com.alexandredev.gateway.GatewayApplication</mainClass>
                 </configuration>
             </plugin>
             <plugin>
