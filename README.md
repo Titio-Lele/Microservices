@@ -4,9 +4,9 @@ Projeto de estudo com Spring Boot e Spring Cloud, organizado como um multi-módu
 
 ## Checklist rápido
 
-- [x] Java `21`
-- [x] Spring Boot `3.3.5`
-- [x] Spring Cloud `2023.0.3`
+- [x] Java `25`
+- [x] Spring Boot `3.5.13`
+- [x] Spring Cloud `2025.0.1`
 - [x] Módulos `core`, `log`, `discovery` e `gateway`
 - [x] PostgreSQL para o serviço `log`
 - [x] Eureka para service discovery
@@ -47,7 +47,7 @@ Exemplo:
 
 ## Pré-requisitos
 
-- Java 21
+- Java 25
 - Maven 3.8+ ou uso do wrapper `./mvnw`
 - Docker com `docker compose`
 

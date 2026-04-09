@@ -4,6 +4,16 @@ eureka:
 
 spring:
   cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: log-service
+              uri: lb://log
+              predicates:
+                - Path=/gateway/log/**
+              filters:
+                - StripPrefix=2
     discovery:
       client:
         simple:
